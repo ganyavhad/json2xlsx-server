@@ -2,7 +2,32 @@ const JSONData = require("../service/JSONData");
 const fs = require("fs");
 const Promise = require("bluebird");
 let model = {
-  upload: async function (filename, start = 0, end = 200000) {
+  downloadExcel: async function (start = 0, end = 2000000) {
+    let i = 0;
+    let count = 0;
+    let arr = this.makeInterator(end, 4);
+    let skip = start;
+    let limit = Math.ceil(end / 4);
+    await Promise.map(
+      arr,
+      async (a) => {
+        await JSONData.find({}).skip(a.skip).limit(a.limit);
+      },
+      {concurrency: 4}
+    );
+    return;
+  },
+  makeInterator: function (count, len) {
+    let arr = [];
+    for (i = 0; i < len; i++) {
+      arr.push({
+        limit: Math.ceil(count / len),
+        skip: i * Math.ceil(count / len)
+      });
+    }
+    return arr;
+  },
+  upload: async function (filename, start = 0, end = 2000000) {
     try {
       let uploadedData = [];
       uploadedData = JSON.parse(

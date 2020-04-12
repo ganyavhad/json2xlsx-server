@@ -24,12 +24,25 @@ Router.post(
       let start = new Date();
       await JSONDataModel.upload(req.file.filename);
       let end = new Date() - start;
-      res.status(201).send(`File uploaded successfully in ${end} seconds`);
+      res
+        .status(201)
+        .send({message: `File uploaded successfully in ${end} seconds`});
     } catch (error) {
       console.log("error==>", error);
       res.status(500).send(error);
     }
   }
 );
+Router.post("/downloadExcel", async (req, res) => {
+  try {
+    let start = new Date();
+    await JSONDataModel.downloadExcel();
+    let end = new Date() - start;
+    res.status(201).send(`Excel generated successfully in ${end} seconds`);
+  } catch (error) {
+    console.log("error==>", error);
+    res.status(500).send(error);
+  }
+});
 
 module.exports = Router;
