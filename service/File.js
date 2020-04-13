@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema({
-  fileName: String
+  fileName: String,
+  uploadTime: Date
 });
 module.exports = mongoose.model("File", schema);

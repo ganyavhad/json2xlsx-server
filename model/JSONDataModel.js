@@ -1,20 +1,25 @@
 const JSONData = require("../service/JSONData");
 const fs = require("fs");
+const json2xls = require("json2xls");
 const Promise = require("bluebird");
 let model = {
+  convertXLSX: async function (data) {
+    let obj = {};
+    var xls = json2xls(data, {fields: {ts: "number", val: "number"}});
+    fs.appendFileSync("data.xlsx", xls, "binary");
+    return;
+  },
   downloadExcel: async function (data, start = 0, end = 2000000) {
-    let i = 0;
-    let count = 0;
     let arr = this.makeInterator(end, 20);
-    let skip = start;
-    let limit = Math.ceil(end / 20);
     await Promise.map(
       arr,
       async (a) => {
         let jsondata = await JSONData.find({file: data.file})
           .skip(a.skip)
           .limit(a.limit);
-        console.log(jsondata.length);
+        if (jsondata && jsondata[0]) {
+          this.convertXLSX(jsondata);
+        }
       },
       {concurrency: 4}
     );

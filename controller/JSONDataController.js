@@ -35,12 +35,13 @@ Router.post(
     }
   }
 );
-Router.post("/downloadExcel", async (req, res) => {
+
+Router.get("/downloadExcel/:id", async (req, res) => {
   try {
     let start = new Date();
-    await JSONDataModel.downloadExcel(req.body);
-    let end = new Date() - start;
-    res.status(201).send(`Excel generated successfully in ${end} seconds`);
+    console.log("req.params.id", req.params.id);
+    await JSONDataModel.downloadExcel({file: req.params.id});
+    res.download("data.xlsx");
   } catch (error) {
     console.log("error==>", error);
     res.status(500).send(error);

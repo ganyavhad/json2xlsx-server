@@ -13,6 +13,7 @@ app.use(function (req, res, next) {
 });
 const mongoose = require("mongoose");
 const JSONDataController = require("./controller/JSONDataController");
+const FileController = require("./controller/FileController");
 mongoose
   .connect("mongodb://localhost:27017/Assignment", {
     useNewUrlParser: true,
@@ -22,6 +23,7 @@ mongoose
   .catch((err) => console.error("connection failed"));
 
 app.use("/JSONData", JSONDataController);
+app.use("/File", FileController);
 
 app.listen(port, () =>
   console.log(`App listening at http://localhost:${port}`)
