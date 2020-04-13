@@ -2,16 +2,19 @@ const JSONData = require("../service/JSONData");
 const fs = require("fs");
 const Promise = require("bluebird");
 let model = {
-  downloadExcel: async function (start = 0, end = 2000000) {
+  downloadExcel: async function (data, start = 0, end = 2000000) {
     let i = 0;
     let count = 0;
-    let arr = this.makeInterator(end, 4);
+    let arr = this.makeInterator(end, 20);
     let skip = start;
-    let limit = Math.ceil(end / 4);
+    let limit = Math.ceil(end / 20);
     await Promise.map(
       arr,
       async (a) => {
-        await JSONData.find({}).skip(a.skip).limit(a.limit);
+        let jsondata = await JSONData.find({file: data.file})
+          .skip(a.skip)
+          .limit(a.limit);
+        console.log(jsondata.length);
       },
       {concurrency: 4}
     );
@@ -27,7 +30,7 @@ let model = {
     }
     return arr;
   },
-  upload: async function (filename, start = 0, end = 2000000) {
+  upload: async function (filename, fileId, start = 0, end = 2000000) {
     try {
       let uploadedData = [];
       uploadedData = JSON.parse(
@@ -41,11 +44,11 @@ let model = {
       await Promise.map(
         dataToSave,
         async (arr) => {
-          await this.bulkPromise(arr);
+          await this.bulkPromise(arr, fileId);
         },
         {concurrency: 4}
       );
-      return this.upload(filename, end, end + 2000000);
+      return this.upload(filename, fileId, end, end + 2000000);
     } catch (error) {
       throw error;
     }
@@ -54,10 +57,11 @@ let model = {
     Array.from({length: Math.ceil(arr.length / size)}, (v, i) =>
       arr.slice(i * size, i * size + size)
     ),
-  bulkPromise: async (data) => {
+  bulkPromise: async (data, fileId) => {
     try {
       let bulk = JSONData.collection.initializeUnorderedBulkOp();
       data.forEach((d) => {
+        d.file = fileId;
         bulk.insert(d);
       });
       await bulk.execute();

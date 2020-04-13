@@ -1,6 +1,7 @@
 const Router = require("express").Router();
 
 const JSONDataModel = require("../model/JSONDataModel");
+const FileModel = require("../model/FileModel");
 
 var multer = require("multer");
 const storage = multer.diskStorage({
@@ -22,7 +23,8 @@ Router.post(
   async (req, res) => {
     try {
       let start = new Date();
-      await JSONDataModel.upload(req.file.filename);
+      let fileData = await FileModel.saveFile(req.file.filename);
+      await JSONDataModel.upload(req.file.filename, fileData._id);
       let end = new Date() - start;
       res
         .status(201)
@@ -36,7 +38,7 @@ Router.post(
 Router.post("/downloadExcel", async (req, res) => {
   try {
     let start = new Date();
-    await JSONDataModel.downloadExcel();
+    await JSONDataModel.downloadExcel(req.body);
     let end = new Date() - start;
     res.status(201).send(`Excel generated successfully in ${end} seconds`);
   } catch (error) {
